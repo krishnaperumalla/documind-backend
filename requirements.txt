@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic[email]
+pinecone
+langchain
+langchain-core
+langchain-community
+langchain-google-genai
+langchain-text-splitters
+pypdf
+cohere
+numpy
+python-dotenv
+bcrypt
+pyjwt
+supabase
