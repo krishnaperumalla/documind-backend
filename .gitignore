@@ -8,7 +8,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
+.git/
 # Environment variables / secrets
 .env
 .env.*
@@ -42,7 +42,7 @@ htmlcov/
 
 # Ruff
 .ruff_cache/
-
+node_modules/
 # Temporary files
 tmp/
 temp/
