@@ -48,7 +48,7 @@ class VectorStore:
                 spec=ServerlessSpec(cloud="aws", region="us-east-1"),
             )
 
-    def put_documents(self, doc_id: str, documents: List[dict], embeddings: np.ndarray) -> List[str]:
+    def put_documents(self, doc_id: str, documents: List[dict], embeddings: np.ndarray, user_id:str, session_id:str) -> List[str]:
         index = self.pc.Index(self.index_name)
         vectors = []
         vector_ids = []
@@ -59,6 +59,8 @@ class VectorStore:
             metadata = dict(doc["metadata"])
             metadata["text"] = doc["page_content"]
             metadata["document_id"] = doc_id
+            metadata["user_id"] = user_id        
+            metadata["session_id"] = session_id  
             vectors.append({
                 "id": vid,
                 "values": emb.tolist(),
@@ -93,6 +95,8 @@ class RagRetriever:
     def get_documents(
         self,
         query: str,
+        user_id: str,           
+        session_id: str = None, 
         initial_k: int = 20,
         rerank_k: int = 12,
         top_k: int = 5
@@ -102,11 +106,16 @@ class RagRetriever:
 
         index = self.vs.pc.Index(self.vs.index_name)
 
+        pinecone_filter = {"user_id": {"$eq": user_id}}
+        if session_id:
+            pinecone_filter["session_id"] = {"$eq": session_id}
+
         try:
             results = index.query(
                 vector=query_embedding.tolist(),
                 top_k=initial_k,
                 include_metadata=True,
+                filter=pinecone_filter,
             )
 
         except Exception as e:

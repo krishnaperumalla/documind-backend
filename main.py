@@ -735,11 +735,11 @@ def query_rag(body: QueryRequest, current_user: dict = Depends(get_current_user)
         # Check if user has documents in this session
         session_docs = db_get_documents(current_user["id"], body.session_id)
 
-        relevant_docs = retriever.get_documents(body.query)
+        relevant_docs = retriever.get_documents(body.query,user_id=current_user["id"],session_id=body.session_id)
         logger.info(f"[{request_id}] retrieved {len(relevant_docs)} chunks (first pass)")
 
         if not relevant_docs and session_docs:
-            relevant_docs = retriever.get_documents(body.query, initial_k=40, top_k=3)
+            relevant_docs = retriever.get_documents(body.query, user_id=current_user["id"],session_id=body.session_id,initial_k=40, top_k=3)
             logger.info(f"[{request_id}] retrieved {len(relevant_docs)} chunks (retry pass)")
 
         if not relevant_docs:
@@ -833,7 +833,9 @@ async def upload_document(
             texts      = [c["page_content"] for c in chunks]
             embeddings = emb_mgr.get_embeddings(texts)
 
-            vector_ids  = vs.put_documents(doc_id, chunks, embeddings)
+            vector_ids = vs.put_documents(doc_id, chunks, embeddings,
+                               user_id=current_user["id"],
+                               session_id=session_id)
             chunk_count = len(chunks)
             logger.info(f"upload_document: upserted {chunk_count} vectors (doc={doc_id})")
 
